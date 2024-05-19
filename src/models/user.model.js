@@ -8,7 +8,7 @@ el trim sirve para eliminar los espacios en blanco,
 y que sea el correo unico, es decir, que no exista ya en la bd
 */
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
@@ -25,6 +25,11 @@ const userSchema = mongoose.Schema({
         required: true,
         trim: true
     }
-})
+},
+    {
+        timestamps: true
+    }
+
+)
 
 export default mongoose.model('User', userSchema)
