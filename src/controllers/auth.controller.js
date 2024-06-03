@@ -51,4 +51,44 @@ export const register = async (req, res) => {
 
 
 };
-export const login = (req, res) => res.send("Login");
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        // Buscar al usuario por email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Email o contraseña incorrectos' });
+        }
+
+        // Comparar la contraseña
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Email o contraseña incorrectos' });
+        }
+
+        // Crear el token
+        const token = jwt.sign(
+            {
+                id: user._id,
+            },
+            "Token_Secreto",
+            {
+                expiresIn: "1d"
+            }
+        );
+
+        // Enviar la respuesta con el token
+        res.cookie('token', token, { httpOnly: true });
+        res.json({
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
